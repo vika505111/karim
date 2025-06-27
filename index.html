@@ -289,9 +289,9 @@ input[type="number"]:focus {
     const phoneNumber = "+213779282114";
 const products = JSON.parse(localStorage.getItem('products')) || [];
 const productsPerPage = 16;
-    let currentPage = 1;
-    const quantities = {};
-    let userLocation = "";
+let currentPage = 1;
+let quantities = JSON.parse(localStorage.getItem("quantities")) || {};
+let userLocation = "";
 
     function displayProducts(page) {
       const start = (page - 1) * productsPerPage;
@@ -379,6 +379,7 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       document.getElementById("totalPrice").textContent = `المبلغ الإجمالي: ${total} دج`;
       updateCartCount();
+      localStorage.setItem("quantities", JSON.stringify(quantities));
     }
 
     function updateCartCount() {
