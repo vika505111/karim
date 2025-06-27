@@ -314,13 +314,17 @@ const productsPerPage = 16;
       `).join("");
 
       visibleProducts.forEach(p => {
-        const input = document.getElementById(`qty-${p.id}`);
-        if (!quantities[p.id]) quantities[p.id] = 0;
-        input.addEventListener('input', () => {
-          quantities[p.id] = input.value;
-          updateTotalPrice();
-        });
-      });
+  const input = document.getElementById(`qty-${p.id}`);
+  
+  // ✅ هذه السطر مهم: إذا لم تدخل قيمة، اعتبرها 0
+  input.value = input.value || 0;
+  quantities[p.id] = parseInt(input.value);
+
+  input.addEventListener('input', () => {
+    quantities[p.id] = parseInt(input.value) || 0;
+    updateTotalPrice();
+  });
+});
 
       updateTotalPrice();
     }
