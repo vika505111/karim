@@ -213,34 +213,13 @@
   <div class="cart-icon" onclick="toggleCartPopup()">🛒<span id="cartCount">0</span></div>
   <div class="cart-popup" id="cartPopup"><h4>محتوى السلة:</h4><ul id="cartDetails"></ul></div>
 
-  <script>
+<script>
   const phoneNumber = "+213779282114";
-  let products = JSON.parse(localStorage.getItem('products'));
-
-  // ✅ تحميل بيانات افتراضية إن لم تكن موجودة
-  if (!products || !products.length) {
-    products = [
-      {
-        id: "1",
-        name: "سائل تنظيف الأرضيات",
-        price: 250,
-        pack: "12",
-        img: "https://via.placeholder.com/150"
-      },
-      {
-        id: "2",
-        name: "ماء جافيل مركز",
-        price: 200,
-        pack: "6",
-        img: "https://via.placeholder.com/150"
-      }
-    ];
-    localStorage.setItem('products', JSON.stringify(products));
-  }
-
+  const products = JSON.parse(localStorage.getItem('products')) || [];
   const productsPerPage = 16;
   let currentPage = 1;
   let quantities = JSON.parse(localStorage.getItem("quantities")) || {};
+  let userLocation = "";
 
   function updateTotalPrice() {
     let total = 0;
@@ -273,12 +252,9 @@
         <div><strong>${p.name}</strong></div>
         <div style="color: green;">السعر: ${p.price} دج</div>
         <div>الكمية في العلبة ${p.pack}</div>
-        <div>عدد : <input type="number" min="0" value="${quantities[p.id] !== undefined ? quantities[p.id] : ''}" oninput="handleQtyChange('${p.id}', this.value)"></div>
+        <div>عدد : <input type="number" min="0" value="${quantities[p.id] || ''}" oninput="handleQtyChange('${p.id}', this.value)"></div>
       </div>
     `).join("");
-
-    // ✅ حساب المبلغ بعد عرض المنتجات
-    updateTotalPrice();
   }
 
   function handleQtyChange(id, value) {
@@ -343,10 +319,12 @@
   function update() {
     displayProducts(currentPage);
     updatePagination();
+    updateTotalPrice();
   }
 
   window.addEventListener("load", () => {
     update();
+    updateTotalPrice(); // ✅ هذا هو التعديل الحاسم
   });
 </script>
 </body>
