@@ -315,6 +315,7 @@ const productsPerPage = 16;
 
       visibleProducts.forEach(p => {
         const input = document.getElementById(`qty-${p.id}`);
+        if (!quantities[p.id]) quantities[p.id] = 0;
         input.addEventListener('input', () => {
           quantities[p.id] = input.value;
           updateTotalPrice();
