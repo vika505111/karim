@@ -315,11 +315,14 @@ const productsPerPage = 16;
 
       visibleProducts.forEach(p => {
   const input = document.getElementById(`qty-${p.id}`);
-  
-  // ✅ هذه السطر مهم: إذا لم تدخل قيمة، اعتبرها 0
-  input.value = input.value || 0;
+
+  // هذا السطر يجبر الحقل على أن يبدأ بقيمة 0 إن لم تكن موجودة
+  input.value = quantities[p.id] || 0;
+
+  // نحفظ القيمة في الذاكرة
   quantities[p.id] = parseInt(input.value);
 
+  // عندما المستخدم يكتب كمية جديدة
   input.addEventListener('input', () => {
     quantities[p.id] = parseInt(input.value) || 0;
     updateTotalPrice();
@@ -453,6 +456,9 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
 
     update();
     localStorage.setItem("products", JSON.stringify(products));
+    window.addEventListener('load', () => {
+  updateTotalPrice();
+});
 </script>
 <div style="display: flex; justify-content: center; margin: 10px;">
   <button onclick="getLocation()" style="
