@@ -214,6 +214,32 @@
   <div class="cart-popup" id="cartPopup"><h4>محتوى السلة:</h4><ul id="cartDetails"></ul></div>
 
 <script>
+  const demoProducts = [
+    {
+      id: "1",
+      name: "سائل تنظيف الأرضيات",
+      price: 250,
+      img: "https://via.placeholder.com/140x140.png?text=أرضيات",
+      pack: "12"
+    },
+    {
+      id: "2",
+      name: "مبيض ملابس",
+      price: 300,
+      img: "https://via.placeholder.com/140x140.png?text=مبيض",
+      pack: "6"
+    },
+    {
+      id: "3",
+      name: "منظف زجاج",
+      price: 180,
+      img: "https://via.placeholder.com/140x140.png?text=زجاج",
+      pack: "24"
+    }
+  ];
+
+  localStorage.setItem("products", JSON.stringify(demoProducts));
+  alert("✅ تم إدخال منتجات تجريبية بنجاح! يمكنك الآن إعادة تحميل الصفحة.");
   const phoneNumber = "+213779282114";
   const products = JSON.parse(localStorage.getItem('products')) || [];
   const productsPerPage = 16;
