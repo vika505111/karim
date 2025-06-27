@@ -219,7 +219,6 @@
   const productsPerPage = 16;
   let currentPage = 1;
   let quantities = JSON.parse(localStorage.getItem("quantities")) || {};
-  let userLocation = "";
 
   function updateTotalPrice() {
     let total = 0;
@@ -252,7 +251,10 @@
         <div><strong>${p.name}</strong></div>
         <div style="color: green;">السعر: ${p.price} دج</div>
         <div>الكمية في العلبة ${p.pack}</div>
-        <div>عدد : <input type="number" min="0" value="${quantities[p.id] || ''}" oninput="handleQtyChange('${p.id}', this.value)"></div>
+        <div>عدد : <input type="number" min="0" value="${quantities[p.id] || ''}" 
+          onchange="handleQtyChange('${p.id}', this.value)" 
+          oninput="handleQtyChange('${p.id}', this.value)">
+        </div>
       </div>
     `).join("");
   }
@@ -288,6 +290,7 @@
     const address = document.getElementById("address").value.trim();
     const phone = document.getElementById("phone").value.trim();
     if (!address || !phone) return alert("يرجى إدخال العنوان ورقم الهاتف.");
+
     let message = `طلب جديد:\n`;
     for (const id in quantities) {
       const qty = parseInt(quantities[id]);
@@ -296,15 +299,17 @@
         message += `- ${product.name} × ${qty} = ${qty * product.price} دج\n`;
       }
     }
+
     message += `\nالمجموع: ${document.getElementById("totalPrice").textContent.replace("المبلغ الإجمالي: ", "")}`;
     message += `\nالعنوان: ${address}\nرقم الهاتف: ${phone}`;
     if (note) message += `\nملاحظة: ${note}`;
+
     const encodedMsg = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMsg}`, "_blank");
   }
 
   function updatePagination() {
-    const totalPages = Math.ceil(products.length / productsPerPage);
+    const totalPages = Math.ceil(products.filter(p => !p.hidden).length / productsPerPage);
     const container = document.getElementById("pagination");
     container.innerHTML = "";
     for (let i = 1; i <= totalPages; i++) {
@@ -322,10 +327,7 @@
     updateTotalPrice();
   }
 
-  window.addEventListener("load", () => {
-    update();
-    updateTotalPrice(); // ✅ هذا هو التعديل الحاسم
-  });
+  window.addEventListener("load", update);
 </script>
 </body>
 </html>
