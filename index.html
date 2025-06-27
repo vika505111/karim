@@ -317,10 +317,9 @@ const productsPerPage = 16;
   const input = document.getElementById(`qty-${p.id}`);
 
   // هذا السطر يجبر الحقل على أن يبدأ بقيمة 0 إن لم تكن موجودة
-  input.value = quantities[p.id] || 0;
-
-  // نحفظ القيمة في الذاكرة
-  quantities[p.id] = parseInt(input.value);
+  let savedQty = quantities[p.id] ?? 0;
+input.value = savedQty;
+quantities[p.id] = savedQty;
 
   // عندما المستخدم يكتب كمية جديدة
   input.addEventListener('input', () => {
