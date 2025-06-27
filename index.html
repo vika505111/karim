@@ -252,7 +252,6 @@
         <div style="color: green;">السعر: ${p.price} دج</div>
         <div>الكمية في العلبة ${p.pack}</div>
         <div>عدد : <input type="number" min="0" value="${quantities[p.id] || ''}" 
-          onchange="handleQtyChange('${p.id}', this.value)" 
           oninput="handleQtyChange('${p.id}', this.value)">
         </div>
       </div>
