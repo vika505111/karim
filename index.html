@@ -457,7 +457,8 @@ window.scrollTo({ top: 0, behavior: 'smooth' });
     update();
     localStorage.setItem("products", JSON.stringify(products));
     window.addEventListener('load', () => {
-  updateTotalPrice();
+  quantities = JSON.parse(localStorage.getItem("quantities")) || {};
+  update();
 });
 </script>
 <div style="display: flex; justify-content: center; margin: 10px;">
