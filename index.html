@@ -214,117 +214,140 @@
   <div class="cart-popup" id="cartPopup"><h4>محتوى السلة:</h4><ul id="cartDetails"></ul></div>
 
   <script>
-    const phoneNumber = "+213779282114";
-    const products = JSON.parse(localStorage.getItem('products')) || [];
-    const productsPerPage = 16;
-    let currentPage = 1;
-    let quantities = JSON.parse(localStorage.getItem("quantities")) || {};
-    let userLocation = "";
+  const phoneNumber = "+213779282114";
+  let products = JSON.parse(localStorage.getItem('products'));
 
-    function updateTotalPrice() {
-      let total = 0;
-      for (const id in quantities) {
-        const qty = parseInt(quantities[id]) || 0;
+  // ✅ تحميل بيانات افتراضية إن لم تكن موجودة
+  if (!products || !products.length) {
+    products = [
+      {
+        id: "1",
+        name: "سائل تنظيف الأرضيات",
+        price: 250,
+        pack: "12",
+        img: "https://via.placeholder.com/150"
+      },
+      {
+        id: "2",
+        name: "ماء جافيل مركز",
+        price: 200,
+        pack: "6",
+        img: "https://via.placeholder.com/150"
+      }
+    ];
+    localStorage.setItem('products', JSON.stringify(products));
+  }
+
+  const productsPerPage = 16;
+  let currentPage = 1;
+  let quantities = JSON.parse(localStorage.getItem("quantities")) || {};
+
+  function updateTotalPrice() {
+    let total = 0;
+    for (const id in quantities) {
+      const qty = parseInt(quantities[id]) || 0;
+      const product = products.find(p => p.id == id);
+      if (product) total += qty * product.price;
+    }
+    document.getElementById("totalPrice").textContent = `المبلغ الإجمالي: ${total} دج`;
+    updateCartCount();
+    localStorage.setItem("quantities", JSON.stringify(quantities));
+  }
+
+  function updateCartCount() {
+    let count = 0;
+    for (const id in quantities) {
+      count += parseInt(quantities[id]) || 0;
+    }
+    document.getElementById("cartCount").textContent = count;
+  }
+
+  function displayProducts(page) {
+    const start = (page - 1) * productsPerPage;
+    const end = start + productsPerPage;
+    const visibleProducts = products.filter(p => !p.hidden).slice(start, end);
+
+    document.getElementById("products").innerHTML = visibleProducts.map(p => `
+      <div class="product">
+        <img src="${p.img}" alt="${p.name}">
+        <div><strong>${p.name}</strong></div>
+        <div style="color: green;">السعر: ${p.price} دج</div>
+        <div>الكمية في العلبة ${p.pack}</div>
+        <div>عدد : <input type="number" min="0" value="${quantities[p.id] !== undefined ? quantities[p.id] : ''}" oninput="handleQtyChange('${p.id}', this.value)"></div>
+      </div>
+    `).join("");
+
+    // ✅ حساب المبلغ بعد عرض المنتجات
+    updateTotalPrice();
+  }
+
+  function handleQtyChange(id, value) {
+    quantities[id] = parseInt(value) || 0;
+    updateTotalPrice();
+  }
+
+  function toggleCartPopup() {
+    const popup = document.getElementById("cartPopup");
+    const list = document.getElementById("cartDetails");
+    list.innerHTML = "";
+
+    let hasItems = false;
+    for (const id in quantities) {
+      const qty = parseInt(quantities[id]);
+      if (qty > 0) {
         const product = products.find(p => p.id == id);
-        if (product) total += qty * product.price;
-      }
-      document.getElementById("totalPrice").textContent = `المبلغ الإجمالي: ${total} دج`;
-      updateCartCount();
-      localStorage.setItem("quantities", JSON.stringify(quantities));
-    }
-
-    function updateCartCount() {
-      let count = 0;
-      for (const id in quantities) {
-        count += parseInt(quantities[id]) || 0;
-      }
-      document.getElementById("cartCount").textContent = count;
-    }
-
-    function displayProducts(page) {
-      const start = (page - 1) * productsPerPage;
-      const end = start + productsPerPage;
-      const visibleProducts = products.filter(p => !p.hidden).slice(start, end);
-
-      document.getElementById("products").innerHTML = visibleProducts.map(p => `
-        <div class="product">
-          <img src="${p.img}" alt="${p.name}">
-          <div><strong>${p.name}</strong></div>
-          <div style="color: green;">السعر: ${p.price} دج</div>
-          <div>الكمية في العلبة ${p.pack}</div>
-          <div>عدد : <input type="number" min="0" value="${quantities[p.id] || ''}" oninput="handleQtyChange('${p.id}', this.value)"></div>
-        </div>
-      `).join("");
-    }
-
-    function handleQtyChange(id, value) {
-      quantities[id] = parseInt(value) || 0;
-      updateTotalPrice();
-    }
-
-    function toggleCartPopup() {
-      const popup = document.getElementById("cartPopup");
-      const list = document.getElementById("cartDetails");
-      list.innerHTML = "";
-
-      let hasItems = false;
-      for (const id in quantities) {
-        const qty = parseInt(quantities[id]);
-        if (qty > 0) {
-          const product = products.find(p => p.id == id);
-          const li = document.createElement("li");
-          li.textContent = `${product.name} × ${qty} = ${qty * product.price} دج`;
-          list.appendChild(li);
-          hasItems = true;
-        }
-      }
-
-      if (!hasItems) list.innerHTML = "<li>السلة فارغة.</li>";
-      popup.style.display = popup.style.display === "block" ? "none" : "block";
-    }
-
-    function sendOrder() {
-      const note = document.getElementById("note").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      if (!address || !phone) return alert("يرجى إدخال العنوان ورقم الهاتف.");
-      let message = `طلب جديد:\n`;
-      for (const id in quantities) {
-        const qty = parseInt(quantities[id]);
-        if (qty > 0) {
-          const product = products.find(p => p.id == id);
-          message += `- ${product.name} × ${qty} = ${qty * product.price} دج\n`;
-        }
-      }
-      message += `\nالمجموع: ${document.getElementById("totalPrice").textContent.replace("المبلغ الإجمالي: ", "")}`;
-      message += `\nالعنوان: ${address}\nرقم الهاتف: ${phone}`;
-      if (note) message += `\nملاحظة: ${note}`;
-      const encodedMsg = encodeURIComponent(message);
-      window.open(`https://wa.me/${phoneNumber}?text=${encodedMsg}`, "_blank");
-    }
-
-    function updatePagination() {
-      const totalPages = Math.ceil(products.length / productsPerPage);
-      const container = document.getElementById("pagination");
-      container.innerHTML = "";
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.textContent = i;
-        if (i === currentPage) btn.style.backgroundColor = "lightgreen";
-        btn.onclick = () => { currentPage = i; update(); };
-        container.appendChild(btn);
+        const li = document.createElement("li");
+        li.textContent = `${product.name} × ${qty} = ${qty * product.price} دج`;
+        list.appendChild(li);
+        hasItems = true;
       }
     }
 
-    function update() {
-      displayProducts(currentPage);
-      updatePagination();
-      updateTotalPrice();
-    }
+    if (!hasItems) list.innerHTML = "<li>السلة فارغة.</li>";
+    popup.style.display = popup.style.display === "block" ? "none" : "block";
+  }
 
-    window.addEventListener("load", () => {
-      update();
-    });
-  </script>
+  function sendOrder() {
+    const note = document.getElementById("note").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    if (!address || !phone) return alert("يرجى إدخال العنوان ورقم الهاتف.");
+    let message = `طلب جديد:\n`;
+    for (const id in quantities) {
+      const qty = parseInt(quantities[id]);
+      if (qty > 0) {
+        const product = products.find(p => p.id == id);
+        message += `- ${product.name} × ${qty} = ${qty * product.price} دج\n`;
+      }
+    }
+    message += `\nالمجموع: ${document.getElementById("totalPrice").textContent.replace("المبلغ الإجمالي: ", "")}`;
+    message += `\nالعنوان: ${address}\nرقم الهاتف: ${phone}`;
+    if (note) message += `\nملاحظة: ${note}`;
+    const encodedMsg = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMsg}`, "_blank");
+  }
+
+  function updatePagination() {
+    const totalPages = Math.ceil(products.length / productsPerPage);
+    const container = document.getElementById("pagination");
+    container.innerHTML = "";
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i;
+      if (i === currentPage) btn.style.backgroundColor = "lightgreen";
+      btn.onclick = () => { currentPage = i; update(); };
+      container.appendChild(btn);
+    }
+  }
+
+  function update() {
+    displayProducts(currentPage);
+    updatePagination();
+  }
+
+  window.addEventListener("load", () => {
+    update();
+  });
+</script>
 </body>
 </html>
